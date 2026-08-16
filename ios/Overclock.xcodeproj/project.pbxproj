@@ -1,0 +1,76 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		17B9EE4693554B3E872463BC /* OverclockApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D69E22DA55946C3AD24E85E /* OverclockApp.swift */; };
+		5EFE6D17E8E54951B57952FB /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0239DD0339AB4490A3679947 /* GameView.swift */; };
+		AC1862A9B0C548CF9894EAC4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 615DB9F899574E6A991720D9 /* Assets.xcassets */; };
+		161CD3B1787944BDA9CB4382 /* web in Resources */ = {isa = PBXBuildFile; fileRef = F70AEF50561F4DB3B235C3E0 /* web */; };
+		0F122B5E44E14CA7B7945EF3 /* PauseButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F67F4E978E64402B5697F1D /* PauseButton.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		4D69E22DA55946C3AD24E85E /* OverclockApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "OverclockApp.swift"; sourceTree = "<group>"; };
+		0239DD0339AB4490A3679947 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameView.swift"; sourceTree = "<group>"; };
+		615DB9F899574E6A991720D9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F70AEF50561F4DB3B235C3E0 /* web */ = {isa = PBXFileReference; lastKnownFileType = folder; path = web; sourceTree = "<group>"; };
+		21880833820D4130B07C74EA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		14525525CDBA470FB63A51F1 /* Overclock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Overclock.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F67F4E978E64402B5697F1D /* PauseButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PauseButton.swift"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		883BD67F31A44F548A20F2FD = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2F71AF45B2E249518D2D1060 = {isa = PBXGroup; children = (A2F36B4CEE4D428BAAF43A3E /* Overclock */, 6A261CF6980E4B5588156EF6 /* Products */,); sourceTree = "<group>"; };
+		A2F36B4CEE4D428BAAF43A3E /* Overclock */ = {isa = PBXGroup; children = (
+				4D69E22DA55946C3AD24E85E /* OverclockApp.swift */,
+				0239DD0339AB4490A3679947 /* GameView.swift */,
+				4F67F4E978E64402B5697F1D /* PauseButton.swift */,
+				615DB9F899574E6A991720D9 /* Assets.xcassets */,
+				F70AEF50561F4DB3B235C3E0 /* web */,
+				21880833820D4130B07C74EA /* Info.plist */,
+			); path = Overclock; sourceTree = "<group>"; };
+		6A261CF6980E4B5588156EF6 /* Products */ = {isa = PBXGroup; children = (14525525CDBA470FB63A51F1 /* Overclock.app */,); name = Products; sourceTree = "<group>"; };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		554168DFDA45419D8F3CC3EB /* Overclock */ = {isa = PBXNativeTarget; buildConfigurationList = A9AF832BA5E54B8992D3A349; buildPhases = (27AB9DB82EBE4C468D7223F3, 883BD67F31A44F548A20F2FD, 1919471C3E3A49A89CB00D1E,); buildRules = (); dependencies = (); name = Overclock; productName = Overclock; productReference = 14525525CDBA470FB63A51F1; productType = "com.apple.product-type.application"; };
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4924FDFB48A649979A2F4BE1 /* Project object */ = {isa = PBXProject; attributes = {BuildIndependentTargetsInParallel = 1; LastSwiftUpdateCheck = 1600; LastUpgradeCheck = 1600; TargetAttributes = {554168DFDA45419D8F3CC3EB = {CreatedOnToolsVersion = 16.0; };};}; buildConfigurationList = ED555FFAA354410E99AF4C74; compatibilityVersion = "Xcode 15.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, Base,); mainGroup = 2F71AF45B2E249518D2D1060; productRefGroup = 6A261CF6980E4B5588156EF6; projectDirPath = ""; projectRoot = ""; targets = (554168DFDA45419D8F3CC3EB /* Overclock */,); };
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1919471C3E3A49A89CB00D1E = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (AC1862A9B0C548CF9894EAC4, 161CD3B1787944BDA9CB4382,); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		27AB9DB82EBE4C468D7223F3 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
+				17B9EE4693554B3E872463BC /* OverclockApp.swift */,
+				5EFE6D17E8E54951B57952FB /* GameView.swift */,
+				0F122B5E44E14CA7B7945EF3 /* PauseButton.swift */,
+		); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		6CCB71A5D7B345698353153F /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_STRICT_OBJC_MSGSEND = YES; ENABLE_TESTABILITY = YES; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_OPTIMIZATION_LEVEL = 0; GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)",); IPHONEOS_DEPLOYMENT_TARGET = 16.0; MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE; ONLY_ACTIVE_ARCH = YES; SDKROOT = iphoneos; SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)"; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; }; name = Debug; };
+		C8BEDA7143AA45BFAE4168C1 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; ENABLE_NS_ASSERTIONS = NO; ENABLE_STRICT_OBJC_MSGSEND = YES; GCC_C_LANGUAGE_STANDARD = gnu17; IPHONEOS_DEPLOYMENT_TARGET = 16.0; MTL_ENABLE_DEBUG_INFO = NO; SDKROOT = iphoneos; SWIFT_COMPILATION_MODE = wholemodule; VALIDATE_PRODUCT = YES; }; name = Release; };
+		1E36DD9595B84B61A940CA17 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; ENABLE_PREVIEWS = YES; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_FILE = Overclock/Info.plist; INFOPLIST_KEY_UILaunchScreen_Generation = YES; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks",); MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.overclock.arcade; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Debug; };
+		74D7F2E0C4464E4FB9299595 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; ENABLE_PREVIEWS = YES; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_FILE = Overclock/Info.plist; INFOPLIST_KEY_UILaunchScreen_Generation = YES; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks",); MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.overclock.arcade; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Release; };
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		ED555FFAA354410E99AF4C74 = {isa = XCConfigurationList; buildConfigurations = (6CCB71A5D7B345698353153F /* Debug */, C8BEDA7143AA45BFAE4168C1 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		A9AF832BA5E54B8992D3A349 = {isa = XCConfigurationList; buildConfigurations = (1E36DD9595B84B61A940CA17 /* Debug */, 74D7F2E0C4464E4FB9299595 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+	};
+	rootObject = 4924FDFB48A649979A2F4BE1 /* Project object */;
+}

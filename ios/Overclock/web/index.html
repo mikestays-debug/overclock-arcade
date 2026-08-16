@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Overclock</title>
+
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Overclock">
+<meta name="theme-color" content="#0b0f1e">
+<meta name="description" content="Games built in-house. Running hotter than rated.">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh;
+    background: radial-gradient(ellipse at 50% 0%, #1d2450 0%, #0b0f1e 60%);
+    color: #fff; font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    padding: clamp(20px, 5vw, 56px) clamp(16px, 4vw, 40px);
+  }
+  header { max-width: 900px; margin: 0 auto clamp(24px, 5vw, 44px); }
+  h1 {
+    margin: 0 0 6px; font-size: clamp(28px, 7vw, 48px); font-weight: 800;
+    letter-spacing: 0.10em; color: #ffcc4d;
+  }
+  .sub { margin: 0; color: rgba(255,255,255,0.55); font-size: 12px;
+         letter-spacing: 0.26em; text-transform: uppercase; }
+  .grid {
+    max-width: 900px; margin: 0 auto;
+    display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  }
+  .card {
+    display: block; text-decoration: none; color: inherit;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px; padding: 20px;
+    min-height: 132px;
+    transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  }
+  .card:hover, .card:focus-visible {
+    transform: translateY(-3px);
+    border-color: #ffcc4d;
+    background: rgba(255,204,77,0.10);
+    outline: none;
+  }
+  .card h2 { margin: 0 0 6px; font-size: 19px; font-weight: 700; }
+  .card p  { margin: 0 0 14px; font-size: 13px; line-height: 1.5; color: rgba(255,255,255,0.68); }
+  .tag {
+    display: inline-block; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 5px 10px; border-radius: 999px;
+    background: rgba(255,204,77,0.16); color: #ffcc4d;
+  }
+  footer {
+    max-width: 900px; margin: clamp(28px, 6vw, 52px) auto 0;
+    font-size: 12px; color: rgba(255,255,255,0.42); line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>OVERCLOCK</h1>
+    <p class="sub">Running hotter than rated</p>
+  </header>
+
+  <div class="grid">
+    <a class="card" href="apex_run/">
+      <h2>Apex Run</h2>
+      <p>Pseudo-3D arcade racer. Three circuits, seven rivals over three laps, and a championship across all of them.</p>
+      <span class="tag">Racing</span>
+    </a>
+  </div>
+
+  <footer>
+    Keyboard, or a controller over Bluetooth or USB. Touch controls appear automatically on phones and tablets.
+    <br>
+    <strong style="color:#ffcc4d">On a phone:</strong> tap Share, then <strong>Add to Home Screen</strong> — it installs
+    with its own icon and plays full screen, no app store needed.
+  </footer>
+</body>
+</html>
