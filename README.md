@@ -15,6 +15,11 @@ A small arcade, shipped two ways from one codebase.
 Pseudo-3D arcade racer — three circuits, seven rivals, three laps, and a championship across
 all of them. Keyboard, gamepad over Bluetooth or USB, or on-screen touch controls.
 
+## Kaboom
+Catch the Mad Bomber's bombs in your buckets. Miss one and every bomb on screen detonates and
+costs you a bucket. Eight levels, rising speed and points per bomb, bonus buckets, saved best
+score. Keyboard, mouse, gamepad, or drag a finger to slide the buckets.
+
 ---
 
 ## The iOS app
