@@ -27,7 +27,8 @@
     overscroll-behavior: none; touch-action: none;
   }
   #stage { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
-  canvas#game { display: block; background: #0b0f1e; }
+  canvas#game { display: block; background: #0b0f1e; touch-action: none; }
+  #stage { touch-action: none; }
 
   /* Touch row. Empty on purpose: the iOS wrapper injects its pause button here.
      Dragging anywhere on the playfield moves the buckets. */
@@ -217,10 +218,16 @@ function pointerToX(e) {
   const r = canvas.getBoundingClientRect();
   return (e.clientX - r.left) / r.width * W;
 }
-canvas.addEventListener("pointerdown", e => { initAudio(); targetX = pointerToX(e); canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener("pointerdown", e => { initAudio(); targetX = pointerToX(e); try { canvas.setPointerCapture(e.pointerId); } catch (err) {} });
 canvas.addEventListener("pointermove", e => {
   if (e.pointerType === "mouse" || e.buttons) targetX = pointerToX(e);
 });
+// The iOS wrapper sets touch-action: manipulation on the page, which lets Safari
+// treat a drag as a pan and cancel the pointer stream mid-gesture. Touch events
+// with preventDefault stop that, so dragging keeps working inside the app too.
+function touchToX(e) { const t = e.touches[0] || e.changedTouches[0]; return pointerToX(t); }
+canvas.addEventListener("touchstart", e => { e.preventDefault(); initAudio(); targetX = touchToX(e); }, { passive: false });
+canvas.addEventListener("touchmove",  e => { e.preventDefault(); targetX = touchToX(e); }, { passive: false });
 const tp = document.getElementById("t-pause");
 function firePause(e) { e.preventDefault(); e.stopPropagation(); togglePause(); haptic("light"); }
 tp.addEventListener("touchstart", firePause, { passive: false });
