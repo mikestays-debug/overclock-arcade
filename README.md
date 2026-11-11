@@ -17,8 +17,8 @@ all of them. Keyboard, gamepad over Bluetooth or USB, or on-screen touch control
 
 ## Kaboom
 Catch the Mad Bomber's bombs in your buckets. Miss one and every bomb on screen detonates and
-costs you a bucket. Eight levels, rising speed and points per bomb, bonus buckets, saved best
-score. Keyboard, mouse, gamepad, or drag a finger to slide the buckets.
+costs you a bucket. Speed and points per bomb rise every level, with streaks, a bonus for a
+perfect level, extra buckets, and a saved best score. Fills the whole screen on a phone. Keyboard, mouse, gamepad, or drag a finger to slide the buckets.
 
 ---
 

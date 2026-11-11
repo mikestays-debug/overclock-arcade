@@ -26,7 +26,11 @@
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior: none; touch-action: none;
   }
-  #stage { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+  #stage { position: fixed; inset: 0; }
+  #fit { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  #safe { position: fixed; top: 0; left: 0; width: 0; height: 0; visibility: hidden; pointer-events: none;
+          padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+  #t-pause { right: max(14px, env(safe-area-inset-right)); }
   canvas#game { display: block; background: #0b0f1e; touch-action: none; }
   #stage { touch-action: none; }
 
@@ -70,9 +74,12 @@
 </style>
 </head>
 <body>
+<div id="safe"></div>
 <div id="stage">
-  <canvas id="game"></canvas>
-  <div id="touch"><div class="tbtn" id="t-pause" aria-label="Pause" style="left:50%;transform:translateX(-50%)">&#10074;&#10074;</div></div>
+  <!-- #fit exists because the iOS wrapper pads every direct child of <body>;
+       an absolutely-positioned child ignores that padding and stays edge to edge. -->
+  <div id="fit"><canvas id="game"></canvas></div>
+  <div id="touch"><div class="tbtn" id="t-pause" aria-label="Pause">&#10074;&#10074;</div></div>
   <div id="overlay">
     <div class="card" id="card"></div>
   </div>
@@ -84,27 +91,29 @@
 /* =====================================================================
    KABOOM — tunables live here so the game can be tuned without hunting.
    ===================================================================== */
-const W = 480, H = 640;                 // logical playfield; scaled to fit any screen
+const W = 480;                          // logical width; height adapts to the screen (see resize)
+let H = 640;
 const CFG = {
   startBuckets: 3,
   maxBuckets: 3,
   extraBucketEvery: 5000,     // points between bonus buckets (capped at maxBuckets)
   maxLevel: 8,                // level also = points per bomb, capped here
-  bombsBase: 10,              // bombs in level 1
-  bombsPerLevel: 5,           // extra bombs each level after
-  gravityBase: 150,           // px/s^2 fall acceleration at level 1
-  gravityPerLevel: 22,
-  bomberSpeedBase: 130,       // px/s
-  bomberSpeedPerLevel: 22,
-  dropEveryBase: 0.95,        // seconds between drops at level 1
-  dropEveryPerLevel: 0.08,
-  dropEveryMin: 0.32,
+  bombsBase: 12,              // bombs in level 1
+  bombsPerLevel: 6,           // extra bombs each level after
+  gravityBase: 170,           // px/s^2 fall acceleration at level 1
+  gravityPerLevel: 26,
+  bomberSpeedBase: 150,       // px/s
+  bomberSpeedPerLevel: 26,
+  dropEveryBase: 0.80,        // seconds between drops at level 1
+  dropEveryPerLevel: 0.07,
+  dropEveryMin: 0.20,
+  perfectBonus: 50,           // x level, for clearing a level without a miss
   bucketSpeed: 620,           // px/s for keyboard / gamepad
   bucketW: 84, bucketH: 16, bucketGap: 14,
 };
-const GROUND = H - 40;
-const BUCKET_Y = H - 150;       // top bucket; extras stack below it
-const ROOF_Y = 140;
+const STEP = CFG.bucketH + CFG.bucketGap;
+// Layout depends on screen shape and notch, so these are set in resize().
+let GROUND = 600, BUCKET_Y = 490, ROOF_Y = 140, SAFE_T = 0;
 
 /* ---------- platform bridge (no-ops on the web) ---------- */
 const OC = window.Overclock || { haptic() {}, share() {}, isApp: false };
@@ -130,6 +139,11 @@ let phaseT = 0;                  // countdown / explosion timers
 let exploding = null;            // { t } while a miss chain-detonation plays
 let newBest = false;
 let muted = false;
+let streak = 0, perfect = true, eased = 0;   // eased: a miss slows the rest of the level one step
+let kick = 0;                                // bucket bounce on a catch
+let mood = "smirk", moodT = 0;               // bomber's face: smirk | grin (you missed) | frown (you cleared)
+const stars = Array.from({ length: 40 }, (_, i) => ({ x: (i * 97.3) % 1, y: (i * 61.7) % 1, r: 0.6 + (i % 3) * 0.5 }));
+function effLevel() { return Math.max(1, Math.min(level, 12) - eased); }
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -137,18 +151,31 @@ const overlay = document.getElementById("overlay");
 const card = document.getElementById("card");
 let scale = 1, dpr = 1;
 
+const fit = document.getElementById("fit"), safeEl = document.getElementById("safe");
 function resize() {
   dpr = Math.min(window.devicePixelRatio || 1, 2);
-  scale = Math.min(window.innerWidth / W, window.innerHeight / H);
+  const vw = fit.clientWidth || window.innerWidth, vh = fit.clientHeight || window.innerHeight;
+  // Width is fixed at 480 logical px; height stretches so a tall phone is filled
+  // edge to edge instead of letterboxed. Clamped so the game stays playable.
+  H = Math.round(Math.max(560, Math.min(1040, W * vh / vw)));
+  scale = Math.min(vw / W, vh / H);
+  const cs = getComputedStyle(safeEl);
+  const full = Math.abs(H * scale - vh) < 2;                 // canvas reaches the screen edges
+  SAFE_T = full ? (parseFloat(cs.paddingTop) || 0) / scale : 0;
+  const safeB = full ? (parseFloat(cs.paddingBottom) || 0) / scale : 0;
+  const isTouch = document.body.classList.contains("touch");
+  ROOF_Y = 140 + SAFE_T;
+  GROUND = H - (isTouch ? 76 : 40) - safeB;                  // touch: leave room for the pause button
+  BUCKET_Y = GROUND - 112;
   canvas.style.width = (W * scale) + "px";
   canvas.style.height = (H * scale) + "px";
   canvas.width = Math.round(W * scale * dpr);
   canvas.height = Math.round(H * scale * dpr);
 }
-window.addEventListener("resize", resize);
-resize();
-
 if (window.matchMedia("(hover: none) and (pointer: coarse)").matches) document.body.classList.add("touch");
+window.addEventListener("resize", resize);
+window.addEventListener("orientationchange", () => setTimeout(resize, 250));
+resize();
 
 /* ---------- audio: tiny synth, no assets ---------- */
 let ac = null, master = null;
@@ -179,7 +206,8 @@ function noise(dur, vol) {
 }
 const sfx = {
   drop()  { tone(520, 0.12, "triangle", 0.06, 380); },
-  catch(lv) { tone(440 + lv * 60, 0.09, "square", 0.12, 880 + lv * 60); },
+  catch(n) { const f = 392 * Math.pow(1.0595, Math.min(n, 24)); tone(f, 0.09, "square", 0.12, f * 1.9); },
+  perfect() { [659, 784, 988, 1319, 1568].forEach((f, i) => tone(f, 0.12, "triangle", 0.13, 0, i * 0.07)); },
   boom()  { noise(0.7, 0.45); tone(120, 0.5, "sawtooth", 0.2, 30); },
   level() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.14, "square", 0.12, 0, i * 0.09)); },
   extra() { [784, 988, 1319].forEach((f, i) => tone(f, 0.12, "triangle", 0.14, 0, i * 0.08)); },
@@ -264,6 +292,7 @@ function startGame() {
 }
 function beginLevel() {
   bombs = []; sparks = []; pops = []; exploding = null;
+  streak = 0; perfect = true; eased = 0;
   bombsLeft = levelBombs(level);
   bomber.x = W / 2; bomber.dir = Math.random() < 0.5 ? -1 : 1; bomber.turnT = 0.8; bomber.dropT = 1.2;
   phaseT = 2.4;
@@ -282,7 +311,7 @@ function toggleMute() {
 function dropBomb() {
   if (bombsLeft <= 0) return;
   bombsLeft--;
-  const L = Math.min(level, 12);
+  const L = effLevel();
   // Bombs inherit sideways drift from the bomber so they aren't dead-vertical.
   bombs.push({ x: bomber.x, y: ROOF_Y + 34, vy: 60, g: CFG.gravityBase + L * CFG.gravityPerLevel, wob: Math.random() * 6.28 });
   sfx.drop();
@@ -291,8 +320,10 @@ function dropBomb() {
 function catchBomb(b) {
   score += pointsPerBomb();
   caughtThisLevel++;
-  sfx.catch(Math.min(level, 8));
-  for (let i = 0; i < 8; i++) sparks.push({ x: b.x, y: BUCKET_Y, vx: (Math.random() - 0.5) * 220, vy: -Math.random() * 220 - 40, t: 0.45, c: "#7fd4ff" });
+  streak++; kick = 1;
+  sfx.catch(streak);
+  if (streak > 0 && streak % 25 === 0) { pops.push({ text: streak + " IN A ROW", t: 1.1 }); haptic("light"); }
+  for (let i = 0; i < 8; i++) sparks.push({ x: b.x, y: Math.max(BUCKET_Y, Math.min(b.y, BUCKET_Y + (buckets - 1) * STEP)), vx: (Math.random() - 0.5) * 220, vy: -Math.random() * 220 - 40, t: 0.45, c: "#7fd4ff" });
   if (score >= bonusAt) {
     bonusAt += CFG.extraBucketEvery;
     if (buckets < CFG.maxBuckets) { buckets++; sfx.extra(); haptic("medium"); pops.push({ text: "EXTRA BUCKET", t: 1.2 }); }
@@ -313,13 +344,20 @@ function missBomb() {
     }
   });
   bombs = [];
-  buckets--;
+  buckets--; streak = 0; perfect = false; eased = 1;
+  mood = "grin"; moodT = 2.2;
   sfx.boom(); haptic("heavy");
 }
 
 function levelDone() {
+  if (perfect) {
+    const bonus = CFG.perfectBonus * level;
+    score += bonus; if (score > best) { best = score; newBest = true; }
+    pops.push({ text: "PERFECT +" + bonus, t: 1.9 }); sfx.perfect();
+  } else sfx.level();
+  mood = "frown"; moodT = 2.0;
   level++;
-  sfx.level(); haptic("medium");
+  haptic("medium");
   pops.push({ text: "LEVEL " + level, t: 1.6 });
   beginLevelSoft();
 }
@@ -327,7 +365,7 @@ function beginLevelSoft() {
   // Same as beginLevel but keeps the celebratory pop text alive.
   const keep = pops.slice();
   beginLevel();
-  pops = keep;
+  pops = keep; pops.forEach((q, i) => q.row = i);
   phaseT = 2.0;
 }
 
@@ -355,6 +393,8 @@ function update(dt) {
   pops.forEach(p => p.t -= dt);
   pops = pops.filter(p => p.t > 0);
   bomber.mouth = Math.max(0, bomber.mouth - dt * 4);
+  kick = Math.max(0, kick - dt * 7);
+  if (moodT > 0) { moodT -= dt; if (moodT <= 0) mood = "smirk"; }
 
   if (gameState === "countdown") {
     const before = Math.ceil(phaseT);
@@ -377,7 +417,7 @@ function update(dt) {
   }
 
   // bomber patrols the roof; speeds up each level and reverses at random
-  const L = Math.min(level, 12);
+  const L = effLevel();
   const sp = CFG.bomberSpeedBase + L * CFG.bomberSpeedPerLevel;
   bomber.x += bomber.dir * sp * dt;
   bomber.turnT -= dt;
@@ -397,8 +437,10 @@ function update(dt) {
     const prevY = b.y;
     b.vy += b.g * dt; b.y += b.vy * dt; b.wob += dt * 12;
     // Swept test: a fast bomb can jump the whole catch zone in one frame.
-    const topY = BUCKET_Y;
-    if (b.y >= topY - 6 && prevY <= topY + CFG.bucketH && Math.abs(b.x - bucketX) < CFG.bucketW / 2 + 6) {
+    // The whole stack catches, like the original: lose a bucket and the net gets shorter.
+    const topY = BUCKET_Y, botY = BUCKET_Y + (buckets - 1) * STEP + CFG.bucketH;
+    if (Math.random() < dt * 18) sparks.push({ x: b.x + 5, y: b.y - 23, vx: (Math.random() - 0.5) * 30, vy: -40, t: 0.25, c: "#ffcc4d" });
+    if (b.y >= topY - 6 && prevY <= botY && Math.abs(b.x - bucketX) < CFG.bucketW / 2 + 6) {
       bombs.splice(i, 1); catchBomb(b); continue;
     }
     if (b.y >= GROUND - 6) { missBomb(); return; }
@@ -416,8 +458,15 @@ function drawBomber() {
   ctx.fillStyle = "#222"; ctx.fillRect(x - 17, y - 56, 34, 9);                      // hat
   ctx.fillStyle = "#222"; ctx.fillRect(x - 9, y - 42, 4, 4); ctx.fillRect(x + 5, y - 42, 4, 4);  // eyes
   ctx.fillStyle = "#6b3a1d"; ctx.fillRect(x - 15, y - 34, 30, 5);                   // moustache-ish brow band
-  ctx.fillStyle = "#401010";
-  const m = 4 + bomber.mouth * 9; ctx.fillRect(x - 7, y - 30, 14, m);               // mouth opens on a drop
+  if (mood === "grin") {                                                           // you missed: big toothy grin
+    ctx.fillStyle = "#401010"; ctx.fillRect(x - 11, y - 31, 22, 8);
+    ctx.fillStyle = "#fff"; ctx.fillRect(x - 9, y - 30, 18, 4);
+  } else if (mood === "frown") {                                                   // you cleared the level: sulk
+    ctx.fillStyle = "#401010"; ctx.fillRect(x - 7, y - 29, 14, 3); ctx.fillRect(x - 10, y - 27, 4, 3); ctx.fillRect(x + 6, y - 27, 4, 3);
+  } else {
+    ctx.fillStyle = "#401010";
+    const m = 4 + bomber.mouth * 9; ctx.fillRect(x - 7, y - 30, 14, m);             // mouth opens on a drop
+  }
 }
 
 function drawBomb(b) {
@@ -445,6 +494,9 @@ function draw() {
   const g = ctx.createLinearGradient(0, 0, 0, H);
   g.addColorStop(0, "#1d2450"); g.addColorStop(1, "#0b0f1e");
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = "rgba(255,255,255,0.55)";
+  stars.forEach(st => { ctx.globalAlpha = 0.25 + 0.35 * Math.abs(Math.sin(performance.now() / 900 + st.x * 40)); ctx.fillRect(st.x * W, ROOF_Y + 30 + st.y * (GROUND - ROOF_Y - 220), st.r, st.r); });
+  ctx.globalAlpha = 1;
   ctx.fillStyle = "rgba(255,255,255,0.05)";
   for (let i = 0; i < 9; i++) { const bh = 90 + ((i * 53) % 110); ctx.fillRect(i * 56, GROUND - bh, 44, bh); }
 
@@ -466,19 +518,19 @@ function draw() {
   bombs.forEach(drawBomb);
 
   // buckets: top one catches, spares stack below it
-  for (let i = 0; i < buckets; i++) drawBucket(bucketX, BUCKET_Y + i * (CFG.bucketH + CFG.bucketGap), i > 0);
+  for (let i = 0; i < buckets; i++) drawBucket(bucketX, BUCKET_Y + i * STEP + kick * 4, i > 0);
 
   sparks.forEach(p => { ctx.globalAlpha = Math.max(0, Math.min(1, p.t * 2)); ctx.fillStyle = p.c; ctx.fillRect(p.x - 2, p.y - 2, 4, 4); });
   ctx.globalAlpha = 1;
   ctx.restore();
 
   // HUD
-  const top = 26;
+  const top = 26 + SAFE_T;
   ctx.textBaseline = "alphabetic";
   ctx.fillStyle = "#fff"; ctx.font = "800 30px 'Segoe UI', system-ui, sans-serif"; ctx.textAlign = "left";
   ctx.fillText(String(score).padStart(5, "0"), 16, top + 10);
   ctx.font = "600 12px 'Segoe UI', system-ui, sans-serif"; ctx.fillStyle = "rgba(255,255,255,0.55)";
-  ctx.fillText("BEST " + best + (muted ? "  · MUTED" : ""), 16, top + 28);
+  ctx.fillText("BEST " + best + (streak >= 5 ? "  ·  STREAK " + streak : "") + (muted ? "  · MUTED" : ""), 16, top + 28);
   ctx.textAlign = "right"; ctx.fillStyle = "#ffcc4d"; ctx.font = "800 18px 'Segoe UI', system-ui, sans-serif";
   ctx.fillText("LEVEL " + level, W - 16, top + 8);
   ctx.fillStyle = "rgba(255,255,255,0.55)"; ctx.font = "600 12px 'Segoe UI', system-ui, sans-serif";
@@ -492,7 +544,7 @@ function draw() {
   }
   pops.forEach(p => {
     ctx.globalAlpha = Math.min(1, p.t * 2); ctx.fillStyle = "#ffcc4d"; ctx.font = "800 34px 'Segoe UI', system-ui, sans-serif";
-    ctx.fillText(p.text, W / 2, H / 2 - 90 - (1.6 - p.t) * 14);
+    ctx.fillText(p.text, W / 2, H / 2 - 90 + (p.row || 0) * 44 - (1.6 - p.t) * 14);
   });
   ctx.globalAlpha = 1;
 }
@@ -501,7 +553,7 @@ function draw() {
 function showMenu() {
   card.innerHTML =
     '<h1>KABOOM</h1><div class="tag">Catch every bomb</div>' +
-    '<p>The Mad Bomber is loose on the roof. Slide the buckets under his bombs. Miss one and <b>everything</b> goes off &mdash; and costs you a bucket.</p>' +
+    '<p>The Mad Bomber is loose on the roof. Slide the buckets under his bombs. Clear a level without a miss for a bonus. Miss one and <b>everything</b> goes off &mdash; and costs you a bucket.</p>' +
     '<p class="keys">Move: ← → / A D, mouse, or drag a finger<br>Pause: P / Esc &nbsp;·&nbsp; Mute: M</p>' +
     (best ? '<div class="tag" style="margin:0">Best ' + best + '</div>' : '') +
     '<button class="btn" id="go">PLAY</button>' +
